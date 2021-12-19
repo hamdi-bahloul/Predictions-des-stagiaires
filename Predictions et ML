@@ -1,0 +1,497 @@
+#Importation des librairies:
+import pandas as pd
+import datetime
+from datetime import date
+from datetime import datetime
+import numpy as np
+from numpy import *
+from sklearn import linear_model
+import matplotlib.pyplot as plt
+
+
+
+
+
+
+#Aquisition de la table:
+data=pd.read_excel('data.xlsx')
+
+
+
+
+#Explosion des données:
+data.head()
+
+
+
+
+
+#Nettoyage de la table:
+for i in range (data.shape[0]):
+    data.loc[i,'specialite']=data.loc[i,'specialite'].lower().strip()
+l=set()
+for sp in data['specialite']:
+    l.add(sp)
+l=list(l)
+data.head()
+
+
+
+
+
+#Création d'une fonction qui remplace une chaine par une autre donnée:
+def replace(x,y):
+    for i in range (data.shape[0]):
+        if data.loc[i,'specialite']==x :
+            data.loc[i,'specialite']=y
+            
+            
+            
+
+
+
+
+replace('reseaux  et securite informatiques','reseaux et securites informatiques')
+replace('iset nabeul','reseaux et securites informatiques')
+replace('genie telecom','telecom')
+replace('genie des reseaux','genie reseaux et telecommunications')
+replace('reseaux et securit2 informatique','reseaux et securites informatiques')
+replace("sciences et technologies de l'informatique",'sciences informatique')
+replace('informatique aapliquee  a la gestion','informatique de gestion')
+replace("science et technologie de l'information et de la communication",'sciences informatique')
+replace('informatique app  la gestion','informatique de gestion')
+replace('iset kairouen','informatique de gestion')
+replace('informatique app ala gestion','informatique de gestion')
+replace('informatique app ala gestion ','informatique de gestion')
+replace('reseaux telecom','telecom')
+replace('maintenance micro systèmes informatiques','maintenance micro systemes informatiques')
+replace('anglais des affaires dsd affaire','anglais des affaires appliquees')
+replace('science informatique','sciences informatique')
+replace('genie telecommunications','telecom')
+replace('info app a la gestion','informatique de gestion')
+replace('telcom','telecom')
+replace("anglais des affaires d'affaires",'anglais des affaires appliquees')
+replace('telecommunications','telecom')
+replace('informatique cycle ingenieur','informatique')
+replace('genie iformatique','informatique')
+replace('resseaux','reseaux')
+replace('reseaux et securite informatique','reseaux et securites informatiques')
+replace("science de l'informatique",'sciences informatique')
+replace('informatigue','informatique')
+replace('info de gestion','informatique de gestion')
+replace('informatigue','informatique')
+replace('science de linformatique','sciences informatique')
+replace('info de gestio?n','informatique de gestion')
+replace('telecomunication','telecom') 
+replace('soutien en informatique de gestion','informatique de gestion') 
+replace('expoitation de reseaux','exploitation de reseaux')
+replace('expoitation reseaux','exploitation de reseaux')
+replace('info app ala gestion','informatique de gestion')
+replace('anglais des affaires des affaires','anglais des affaires appliquees')
+replace('informatique appliquee ala gestion','informatique de gestion')
+replace('reseaux et telecom','telecom')
+replace('reseaux info','reseaux')
+replace('anglais des affaires des affaires et du tourisme','anglais des affaires appliquees')
+replace('informatique app a la gestion','informatique de gestion')
+replace('siences informatiques','sciences informatique')
+replace('reseaux informatique','reseaux')
+replace('informatique app  a  la  gestion','informatique de gestion')
+
+
+
+
+
+
+l=set()
+for sp in data['specialite']:
+    l.add(sp)
+l=list(l)
+len(l)
+
+
+
+
+
+#Transformation de type de la colonne "date_debut" en type datetime: 
+for i in range (data.shape[0]):
+    if type (data.loc[i,'date_debut'])!=datetime:
+        x=data.loc[i,'date_debut']
+        x=x.split('/')
+        data.loc[i,'date_debut']=datetime(int(x[2]),int(x[1]),int(x[0]),0,0)
+
+
+
+
+
+for i in range (data.shape[0]):
+    if type (data.loc[i,'date_debut'])!=datetime:
+        print(i)
+
+
+
+
+
+#Création d'une nouvelle colonne :
+for i in range (data.shape[0]):
+    data.loc[i,'annee']=data.loc[i,'date_debut'].year
+
+
+
+
+
+
+#Création d'une nouvelle colonne :
+for i in range (data.shape[0]):
+    data.loc[i,'mois']=data.loc[i,'date_debut'].month
+    
+    
+    
+    
+    
+data.head()
+
+
+
+
+#Visualisation de l'evolution de nombre stagiaires par mois:
+date=[1,2,3,4,5,6,7,8,9,10,11,12]
+n=[]
+for i in date:
+    a=data[data['mois']==i]
+    n.append(a.shape[0])
+    print('Le nombre des stagiaires aux mois ',i,' est ',a.shape[0])
+plt.plot(date,n,marker='.')
+plt.xlabel('Mois')
+plt.ylabel('Nombre des stagiaires')
+plt.title('Evolution du nombre des stagiaires par mois')
+    
+    
+    
+    
+    
+#Visualisation de l'evolution de nombre stagiaires par année:
+date=[2016,2017,2018,2019,2020]
+n=[]
+for i in date:
+    a=data[data['annee']==i]
+    n.append(a.shape[0])
+    print('Le nombre des stagiaires en ',i,' est ',a.shape[0])
+plt.plot(date,n,marker='.')
+plt.xlabel('Année')
+plt.ylabel('Nombre des stagiaires')
+plt.title('Evolution du nombre des stagiaires par annee')
+
+
+
+
+
+
+#Création d'une fonction qui vérifie l'existance d'une spécialité dans la table:
+def test(x):
+    return(x in l)
+
+
+
+
+
+#Création d'une fonction qui predict le nombre de stagiaires en utilisant le model ML "linear regression":
+def prediction(sp,an):
+    annee=array([2016,2017,2018,2019,2020])
+    nbr=[]
+    if test(sp)==False:
+        return ("Cette spécialité n'existe pas !!!")
+    else:
+        df=data[data['specialite']==sp]
+        for x in annee:
+            d=df[df['annee']==x]
+            nbr.append(d.shape[0])
+        annee=annee.reshape(len(annee),1)
+        nbr=array(nbr)
+        nbr=nbr.reshape(len(nbr),1)
+        reg = linear_model.LinearRegression()
+        reg.fit(annee,nbr)
+        plt.scatter(annee,nbr)
+        plt.plot(annee,reg.predict(annee),color="red")
+        print("La pente = ",int(reg.coef_))
+        print("L'ordonnée à l'origine = ",int(reg.intercept_))
+        if int(reg.predict([[an]])) < 0 :
+             print("En", an ,"le nombre des stagiaires de spécialite ", sp , "est expecté à etre  ",0)
+        else:
+             print("En", an ,"le nombre des stagiaires de spécialite ", sp , "est expecté à etre ",int(reg.predict([[an]])))
+
+
+
+
+
+
+
+
+#Faire des predictions:
+prediction('telecom',2022)
+
+
+
+
+#Création d'une fonction qui predict le nombre total des stagiaires:
+def predict_all(an):
+    annee=array([2016,2017,2018,2019,2020])
+    nbr=[]
+    for x in annee:
+        df=data[data['annee']==x]
+        nbr.append(df.shape[0])
+    annee=annee.reshape(len(annee),1)
+    nbr=array(nbr)
+    nbr=nbr.reshape(len(nbr),1)
+    reg = linear_model.LinearRegression()
+    reg.fit(annee,nbr)
+    plt.scatter(annee,nbr)
+    plt.plot(annee,reg.predict(annee),color="red")
+    print("La pente = ",int(reg.coef_))
+    print("L'ordonnée à l'origine = ",int(reg.intercept_))
+    if int(reg.predict([[an]])) < 0 :
+        print("En ", an ,"le nombre total des stagiaires est expecté à etre",0)
+    else:
+        print("En", an ,"le nombre total des stagiaires est expecté à etre ",int(reg.predict([[an]])))
+
+
+
+
+#Faire des predictions:
+predict_all(2021)
+
+
+
+
+
+#Ajout d'une nouvelle colonne contenant la note de stagiaire selon la duree de stage:
+for i in range (data.shape[0]):
+    if data.loc[i,'duree_par_mois']==0.5:
+        data.loc[i,'note']=12
+    elif data.loc[i,'duree_par_mois']==1:
+        data.loc[i,'note']=13
+    elif data.loc[i,'duree_par_mois']==1.5:
+        data.loc[i,'note']=14
+    elif data.loc[i,'duree_par_mois']==2:
+        data.loc[i,'note']=15
+    elif data.loc[i,'duree_par_mois']==2.5:
+        data.loc[i,'note']=16
+    elif data.loc[i,'duree_par_mois']==3:
+        data.loc[i,'note']=17
+    elif data.loc[i,'duree_par_mois']==3.5:
+        data.loc[i,'note']=18
+    elif data.loc[i,'duree_par_mois']==4:
+        data.loc[i,'note']=19
+    else:
+        data.loc[i,'note']=20
+
+
+
+
+
+
+
+#Introduire quelques perturbations:
+data.loc[220,'note']=12
+data.loc[420,'note']=13
+data.loc[350,'note']=18
+data.loc[755,'note']=15
+data.loc[630,'note']=17
+data.loc[690,'note']=16
+data.loc[960,'note']=12
+data.loc[1012,'note']=14
+data.loc[1523,'note']=20
+data.loc[1855,'note']=17
+data.loc[1941,'note']=16
+for i in range (200,210):
+    data.loc[i,'note']=16
+for i in range (550,560):
+    data.loc[i,'note']=15
+for i in range (745,755):
+    data.loc[i,'note']=15
+for i in range (900,910):
+    data.loc[i,'note']=12
+for i in range (1260,1270):
+    data.loc[i,'note']=11
+
+
+
+
+
+#Visualisation de la base apres les modifications:
+data
+
+
+
+
+
+#Creation d'un model machine learning de classification:
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+
+
+
+
+
+#detecter les variables corrolées:
+data.corr()
+
+
+
+
+
+#visualisation des variables qui donne une vue plus claires sur les relation entre eux:
+data.plot(kind='box', subplots=True, layout=(2,2), sharex=False, sharey=False, figsize=(9,9), 
+                                        title='Box Plot for each input variable')
+
+
+
+
+
+data.hist(bins=30, figsize=(10,10))
+
+
+
+
+
+#Caractérisation des inputs et des outputs:
+feature_names = ['duree_par_mois','annee','mois']
+x = data[feature_names]
+y = data['note']
+
+
+
+
+
+
+#Essay de tous les model ML puis on va choisir le plus efficace :
+#Préparation de la partie a entrainer et celle a tester :
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x, y,test_size=0.33, random_state=0)
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+
+
+
+
+#Utilisation du model LogisticRegression et et evaluer son exactitude :
+from sklearn.linear_model import LogisticRegression
+logreg = LogisticRegression()
+logreg.fit(x_train, y_train)
+print('Accuracy of Logistic regression classifier on training set: {:.2f}'
+     .format(logreg.score(x_train, y_train)))
+print('Accuracy of Logistic regression classifier on test set: {:.2f}'
+     .format(logreg.score(x_test, y_test)))
+
+
+
+
+
+#Utilisation du model DecisionTreeClassifier et evaluer son exactitude :
+from sklearn.tree import DecisionTreeClassifier
+clf = DecisionTreeClassifier().fit(x_train, y_train)
+print('Accuracy of Decision Tree classifier on training set: {:.2f}'
+     .format(clf.score(x_train, y_train)))
+print('Accuracy of Decision Tree classifier on test set: {:.2f}'
+     .format(clf.score(x_test, y_test)))
+
+
+
+
+
+
+#Utilisation du model KNeighborsClassifier et evaluer son exactitude :
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier()
+knn.fit(x_train, y_train)
+print('Accuracy of K-NN classifier on training set: {:.2f}'
+     .format(knn.score(x_train, y_train)))
+print('Accuracy of K-NN classifier on test set: {:.2f}'
+     .format(knn.score(x_test, y_test)))
+
+
+
+
+
+
+#Utilisation du model LinearDiscriminantAnalysis et evaluer son exactitude :
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+lda = LinearDiscriminantAnalysis()
+lda.fit(x_train, y_train)
+print('Accuracy of LDA classifier on training set: {:.2f}'
+     .format(lda.score(x_train, y_train)))
+print('Accuracy of LDA classifier on test set: {:.2f}'
+     .format(lda.score(x_test, y_test)))
+
+
+
+
+
+
+#Utilisation du model GaussianNB et evaluer son exactitude :
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+gnb.fit(x_train, y_train)
+print('Accuracy of GNB classifier on training set: {:.2f}'
+     .format(gnb.score(x_train, y_train)))
+print('Accuracy of GNB classifier on test set: {:.2f}'
+     .format(gnb.score(x_test, y_test)))
+
+
+
+
+
+
+
+
+
+#Utilisation du model SVC et evaluer son exactitude :
+from sklearn.svm import SVC
+svm = SVC()
+svm.fit(x_train, y_train)
+print('Accuracy of SVM classifier on training set: {:.2f}'
+     .format(svm.score(x_train, y_train)))
+print('Accuracy of SVM classifier on test set: {:.2f}'
+     .format(svm.score(x_test, y_test)))
+
+
+
+
+
+
+#Realiser des predictions avec le model le plus adéquat qui est DecisionTreeClassifier:
+preds = clf.predict(x_test)
+print(preds)
+
+
+
+
+
+
+#Revérifier la performance de ce model :
+print(accuracy_score(y_test, preds))
+
+
+
+
+rmse=sqrt(mean(preds-y_test)**2)
+rmse
+
+
+
+
+
+#Création d'une objet a predicter:
+p=[[5,2022,2]]
+
+
+
+
+
+
+#Prediction du nouveau objet:
+gnb.predict(p)
+
+
