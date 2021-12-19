@@ -1,0 +1,50 @@
+#Importation de la base de donnÃ©e:
+#importation de la base :
+
+library(readxl)
+data <- read_excel("C:/Users/hamdi/Desktop/Stage/DATA.xlsx", 
+        col_types = c("text", "text", "text","text", "text", "date", "date", "text", "text"))
+        
+        
+        
+        
+        
+#Etude statistique:
+
+#Repartition des deux sexes :
+
+n<-levels(as.factor(data$`TYPE DE STAGIAIRE`))
+donnee<-table(data$`TYPE DE STAGIAIRE`)
+pourcentage<-round(prop.table(donnee)*100,2)
+pie(donnee, labels=c(paste(n[1],':',pourcentage[1],"%")
+                                             , paste(n[2],':',pourcentage[2],"%")),
+           main = "Pourcentage des sexes",col=c("red","yellow"))
+
+
+
+
+
+#Les differents natures des contracts:
+
+pie(table(data$`NATURE ET REFERENCE DU CONTRAT`),main = "Nature des contrats")
+
+
+
+
+
+#Differentes specialités:
+
+table(data$SPECIALITE)
+pie(table(data$`SPECIALITE`),main = "Differentes spÃ©cialitÃ©s")
+
+
+
+
+
+
+#Duree par mois:
+
+table(data$`DUREE PAR MOIS`)
+plot(data$`DUREE PAR MOIS`,col="red",ylab = "DurÃ©e par mois", main = "RÃ©partition des stagiaires par durÃ©e du stage")
+
+
